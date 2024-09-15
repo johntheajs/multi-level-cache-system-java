@@ -10,6 +10,9 @@ public class Main {
         cacheSystem.put("C", "3");
         cacheSystem.get("A");
         cacheSystem.put("D", "4");
+
+        cacheSystem.displayCache();
+
         cacheSystem.get("C");
 
         cacheSystem.displayCache();

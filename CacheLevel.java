@@ -76,7 +76,7 @@ public class CacheLevel {
         for (int i = 0; i < cacheLevels.size(); i++) {
             EvictionPolicy cache = cacheLevels.get(i);
             Node node = cache.getNode(key);
-            if (node != null) {
+            if (node != null && i != 0) {
                 // Promote the node from its current level up to L1 (or next higher levels)
                 promoteToHigherLevels(key, node.value, i);
                 return node.value;
@@ -87,6 +87,7 @@ public class CacheLevel {
 
     // Display the contents of the cache levels
     public void displayCache() {
+        System.out.println("Total number of levels: " + cacheLevels.size());
         for (int i = 0; i < cacheLevels.size(); i++) {
             System.out.println("Cache Level " + (i + 1) + ":");
             cacheLevels.get(i).display(); // Call display method of each level

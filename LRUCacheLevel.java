@@ -30,6 +30,9 @@ public class LRUCacheLevel implements EvictionPolicy {
             return null; // No eviction in this case
         } else {
             if (map.size() >= capacity) {
+                Node newNode = new Node(key, value);
+                list.addNodeToHead(newNode);
+                map.put(key, newNode);
                 Node tail = list.removeTail();
                 map.remove(tail.key);
                 return tail; // Return the evicted node

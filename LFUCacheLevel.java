@@ -32,6 +32,10 @@ public class LFUCacheLevel implements EvictionPolicy {
             return null; // No eviction
         } else {
             if (map.size() >= capacity) {
+                Node newNode = new Node(key, value);
+                newNode.frequency = 1;
+                addNodeToFrequencyList(newNode);
+                map.put(key, newNode);
                 // Evict the least frequently used node
                 Node nodeToEvict = evictLFUNode();
                 map.remove(nodeToEvict.key);
@@ -104,7 +108,6 @@ public class LFUCacheLevel implements EvictionPolicy {
 
     @Override
     public void display() {
-        System.out.print("Cache: ");
         for (Integer freq : frequencyMap.keySet()) {
             DoublyLinkedList list = frequencyMap.get(freq);
             Node current = list.head.next;
