@@ -1,14 +1,18 @@
 import java.util.Scanner;
-// import java.util.concurrent.ExecutorService;
-// import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
         ConcurrentCacheLevel cacheSystem = new ConcurrentCacheLevel();
+        Scanner scanner = new Scanner(System.in);
 
         // Adding initial cache levels
         cacheSystem.addCacheLevel(3, "LRU");
         cacheSystem.addCacheLevel(2, "LFU");
+
+        // Thread pool with multiple threads
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
 
         System.out.println("Cache System Commands:");
         System.out.println("1. put <key> <value>");
@@ -17,8 +21,6 @@ public class Main {
         System.out.println("4. removeCacheLevel <level>");
         System.out.println("5. displayCache");
         System.out.println("6. exit");
-
-        Scanner scanner = new Scanner(System.in);
 
         // Loop for real-time input
         while (true) {
@@ -33,11 +35,10 @@ public class Main {
                     if (tokens.length == 3) {
                         String key = tokens[1];
                         String value = tokens[2];
-                        // Create and start a new thread for the PUT operation
-                        new Thread(() -> {
+                        executorService.submit(() -> {
                             cacheSystem.put(key, value);
                             System.out.println("PUT operation completed.");
-                        }).start();
+                        });
                     } else {
                         System.out.println("Usage: put <key> <value>");
                     }
@@ -46,15 +47,14 @@ public class Main {
                 case "get":
                     if (tokens.length == 2) {
                         String key = tokens[1];
-                        // Create and start a new thread for the GET operation
-                        new Thread(() -> {
+                        executorService.submit(() -> {
                             String result = cacheSystem.get(key);
                             if (result != null) {
                                 System.out.println("GET result: " + result);
                             } else {
                                 System.out.println("Key not found.");
                             }
-                        }).start();
+                        });
                     } else {
                         System.out.println("Usage: get <key>");
                     }
@@ -65,11 +65,10 @@ public class Main {
                         try {
                             int size = Integer.parseInt(tokens[1]);
                             String evictionPolicy = tokens[2];
-                            // Create and start a new thread for adding cache level
-                            new Thread(() -> {
+                            executorService.submit(() -> {
                                 cacheSystem.addCacheLevel(size, evictionPolicy);
                                 System.out.println("Cache level added.");
-                            }).start();
+                            });
                         } catch (NumberFormatException e) {
                             System.out.println("Invalid size. Please enter a valid number.");
                         }
@@ -82,11 +81,10 @@ public class Main {
                     if (tokens.length == 2) {
                         try {
                             int level = Integer.parseInt(tokens[1]);
-                            // Create and start a new thread for removing a cache level
-                            new Thread(() -> {
+                            executorService.submit(() -> {
                                 cacheSystem.removeCacheLevel(level - 1); // Cache levels are 0-indexed internally
                                 System.out.println("Cache level removed.");
-                            }).start();
+                            });
                         } catch (NumberFormatException e) {
                             System.out.println("Invalid level. Please enter a valid number.");
                         }
@@ -96,16 +94,16 @@ public class Main {
                     break;
 
                 case "displaycache":
-                    // Create and start a new thread for displaying the cache
-                    new Thread(() -> {
+                    executorService.submit(() -> {
                         cacheSystem.displayCache();
-                    }).start();
+                    });
                     break;
 
                 case "exit":
-                    System.out.println("Exiting...");
+                    System.out.println("Shutting down...");
+                    executorService.shutdown();
                     scanner.close();
-                    return;
+                    return; // Exit the program
 
                 default:
                     System.out.println("Unknown command. Please try again.");
